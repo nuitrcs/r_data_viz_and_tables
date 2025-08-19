@@ -1,4 +1,4 @@
-Repository for the Data Visualization and Tables with R taught by [Northwestern University IT - Research Computing and Data Services](https://www.it.northwestern.edu/departments/it-services-support/research/) during the summer of 2025.
+Repository for the Data Visualization and Tables with R workshop taught by [Northwestern University IT - Research Computing and Data Services](https://www.it.northwestern.edu/departments/it-services-support/research/) during the summer of 2025.
 
 ***
 
