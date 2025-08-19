@@ -1,0 +1,235 @@
+---
+title: "Basics of ggplot2"
+format: html
+editor: visual
+---
+
+# Introduction
+
+The basic idea behind `ggplot2` is that widely different graphs share a common structure. `ggplot2` gives you the flexibility to create many, many plots once you understand the basic building blocks.
+
+## The grammar of graphics
+
+`ggplot2` is built around the [grammar of graphics](https://doi.org/10.1198/jcgs.2009.07098). The grammar allows you to "speak" a graph from different composable elements: data, mapping, layers, scales, facets, coordinates, and theme.
+
+We'll walk through the elements here. Understanding these elements, particularly in the abstract, can be hard at first. Don't worry if you don't understand everything perfectly. We have built-in a lot of repetition so that, with each iteration, you understand and remember better. Here we discuss the elements in the abstract, and later we'll show you an example.
+
+1.  *Data*. The foundation of a graph is data. You can tell `ggplot2` the data frame that you want to use to build a graph by specifying `ggplot(data = <your data>)`. Data works best in tidy format. Tidy data is data where: a) Each variable is a column; each column is a variable. b) Each observation is a row; each row is an observation. c) Each value is a cell; each cell is a single value.
+
+2.  *Mapping*. You then need to specify how variables (columns) are mapped onto aesthetic attributes; for example, which variable goes in the x axis and which variable goes in the y axis. You specify this with the `aes` function: for example, `aes(x = variable1, y = variable2)`.
+
+3.  *Layers*. Now comes the time to take the mapped data and display it in a graph. This involves determining how the data are displayed (with points, lines), whether you need to compute new variables from the data (statistical transformations), and where you want to display pieces of data. For the most part, you'll specify this using functions that start with `geom_`, followed by the type of plot. For example, `geom_point` for a scatter plot or `geom_line` for a line plot.
+
+4.  *Scales*. Scales translate visuals into an understanding of the data; for example, what value is shown at a particular position, or what value a particular color represents. Scales are responsible for updating the limits of a plot, setting the breaks, and formatting the labels. Once you have data, mapping, and layers, you'll have scales by default. If you want to change the defaults, though, you can use functions that start with `scale_`, followed by the aesthetic they modify (x, y, color), and ending with the type of scale that you want (so `scale_<aesthetic>_<type>`). For example, you may want to use a logarithmic scale on the x axis, in which case you would use `scale_x_log10()`.
+
+5.  *Facets*. Sometimes you want to plot different subsets of the data using the same visualization settings. Facets help you do this with functions that start with `facet_`. For example, you may want to plot variable2 against variable1, but have a separate plot for each of the groups defined by variable3. In the mapping, you would specify `aes(x = variable1, y = variable2)` and later on you would add facets like this: `facet_grid(rows = vars(variable3))`.
+
+6.  *Coordinates*. In the mapping you specify how different parts of the data are mapped onto aesthetic attributes. In the scales, you translated the visuals into an understanding of the data. However, there is a missing piece in between: how to interpret position aesthetics. If this sounds abstract, don't worry! Most of the time you don't think about this because the answer is obvious: the x goes in a horizontal axis and the y goes in a vertical axis. However, sometimes you may want to change this, for example, if you want to create a map, where x and y should instead translate to latitude and longitude. `ggplot2` has a default for coordinates (Cartesian) that works well most of the time, so you could be an amazing user of `ggplot2` without having to change the coordinates. If you do decide to change them, though, you would use a function that starts with `coord_`, followed by what you want the coordinates to be (e.g., `coord_map()`).
+
+7.  *Theme*. In the scales, you controlled visual aspects of the plot that depend on the data. There are other visual aspects that you may want to change independently of the data (the background color, the font, the size of the legend). You can do this with themes. `ggplot2` provides a theme by default, but you can decide among other built-in themes with functions that start with `theme_`, followed by the name of the theme. For example, a nice one is `theme_minimal()`. You can also change specific aspects of the theme with the `theme()` function.
+
+## Setup
+
+Load `tidyverse`, which includes `ggplot2`, and import the data with the `read_csv()` function from the readr package (part of tidyverse).
+
+```{r}
+library(tidyverse)
+healthdata <- read_csv("data/nhanes.csv")
+```
+
+### Data Set Information
+
+We'll be working with this data set throughout the workshop. Here is some information about the variables:
+
+-   **id**: unique ID for the participant
+-   **survey_year**: 2 different survey years: "2009_10" "2011_12"
+-   **gender**: male or female
+-   **age**: age in years (integer values)
+-   **age_decade**: categorical age grouping
+-   **education**: education level completed, text values
+-   **marital_status**: marital status, text values
+-   **work_status**: work status, text values
+-   **income_poverty_ratio**: ratio of participant income to the poverty line
+-   **weight**: weight in kg
+-   **height**: height in cm
+-   **pulse**: heart beats per minute
+-   **bp_sys1**: first systolic (top) blood pressure measure
+-   **bp_dia1**: first diastolic (bottom) blood pressure measure
+-   **bp_sys2**: second systolic (top) blood pressure measure
+-   **bp_dia2**: second diastolic (bottom) blood pressure measure
+-   **bp_sys3**: third systolic (top) blood pressure measure
+-   **bp_dia3**: third diastolic (bottom) blood pressure measure
+-   **cholesterol**: total cholesterol, in millimoles per liter (mmol/L); multiply by 38.67 to convert to US measure in mg/dL
+-   **health_level**: participant-reported overall health level, categorical
+-   **sleep_hours**: number of hours of sleep per weeknight, integer values
+-   **sleep_trouble**: binary indicator of whether participant has sleep problems (Yes/No)
+-   **physically_active**: binary indicator of whether participant participates in at least moderate physical activities (Yes/No)
+
+## Basic structure of a plot
+
+1.  *Data*
+
+Tell `ggplot` what data frame to use.
+
+```{r}
+ggplot(data = healthdata)
+```
+
+2.  *Mapping*
+
+Specify which variables should be mapped to different visual components of the plot.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender))
+```
+
+3.  *Layers*
+
+Specify the type of visualization with a `geom` function.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point()
+```
+
+4.  *Scales*
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous()
+```
+
+Wait, it looks the same! Yes, it's because `ggplot2` noticed that the variables that we wanted to plot are continuous variables, and used scales for the x and y axes accordingly.
+
+5.  *Facets*
+
+Split the plot up by whether those in the study are physically active or not.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  facet_grid(cols = vars(physically_active))
+```
+
+6.  *Coordinates*
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  facet_grid(cols = vars(physically_active)) +
+  coord_cartesian()
+```
+
+Nothing happened... again! It's because `ggplot2` assumed that we wanted a Cartesian coordinate system, which makes sense, and added that by default.
+
+7.  *Theme*
+
+Set the style for the non-data elements of the plot.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  facet_grid(cols = vars(physically_active)) +
+  coord_cartesian() +
+  theme_minimal()
+```
+
+### TRY IT
+
+Create a scatter plot (`geom_point`) of `cholesterol` (`y`) against `weight` (`x`).
+
+```{r}
+
+```
+
+## Adding labels to a plot
+
+`ggplot2` adds basic labels to scales based on the variable names in the data frame. In most cases, you'll want to update these, as well as add titles. Labels for visual elements can be set in the scale functions, but there is also a convenience function `labs()` for setting any labels of the plot, including an overall title, subtitle, and caption.
+
+Beyond title, subtitle, and caption, use the name of the visual element the same as when specifying the variable mapping with `aes()`; for example, x and y.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  facet_grid(cols = vars(physically_active)) +
+  coord_cartesian() +
+  theme_minimal() + 
+  labs(title = "Height and Weight",
+       subtitle = "By Physical Activity Status",
+       x = "Height (cm)",
+       y = "Weight (cm)",
+       caption = "Data from the National Health and Nutrition Examination Survey.")
+```
+
+### Facet Labels
+
+The facet labels come from the values in the `physically_active` variable; they are controlled by modifying the variable values before plotting or with the `labeller` argument of the facet function, not by `labs()`.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  facet_grid(cols = vars(physically_active),
+             labeller = as_labeller(c("No"="Not Physically Active", "Yes"="Physically Active"))) +
+  coord_cartesian() +
+  theme_minimal() + 
+  labs(title = "Height and Weight",
+       subtitle = "By Physical Activity Status",
+       x = "Height (cm)",
+       y = "Weight (cm)",
+       caption = "Data from the National Health and Nutrition Examination Survey.")
+```
+
+### TRY IT
+
+Add labels to the plot you created in the previous exercise above.
+
+```{r}
+
+```
+
+## Saving your plot
+
+```{r}
+awesome_plot <- ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  facet_grid(cols = vars(physically_active)) +
+  coord_cartesian() +
+  theme_minimal() + 
+  labs(title = "Not being physically active affects the relation between height and weight",
+       subtitle = "By Physical Activity Status",
+       x = "Height (cm)",
+       y = "Weight (cm)",
+       caption = "Data from the National Health and Nutrition Examination Survey.")
+
+awesome_plot
+```
+
+Notice that we assigned the plot to a variable. We'll use that variable to save the plot:
+
+```{r}
+ggsave(filename = "ggplot2_basics_plot.pdf", plot = awesome_plot)
+```
+
+You don't necessarily need to assign the plot to a variable. By default, `ggsave` saves the last plot. It's better to assign the plot to a variable and then save it, though, to avoid confussion/for clarity.
+
+### TRY IT
+
+Save the plot that you created above.
+
+```{r}
+
+```

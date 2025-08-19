@@ -1,0 +1,62 @@
+---
+title: "ggplot2: Adding annotations to your plots"
+format: html
+editor: visual
+---
+
+# Annotations
+
+This notebook covers how to annotate plots. Annotations are text, labels, lines, arrows, or other geometrical objects that you add to a plot to make a point or explain something. For example, say there's one or a few observations that are particularly interesting. You can draw an arrow pointing to them!
+
+## Just one or a few annotations (not from the data)
+
+This section presents how to add one or a few annotations to a plot. The annotations in this section are not based on data. This means that you need to specify what the annotation is and where it should go in the text. You can do this with [`annotate`](https://ggplot2.tidyverse.org/reference/annotate.html), which is a flexible function to add annotations to a plot.
+
+### Text
+
+Let's start with adding text to a point. You specify you want to add text with `geom = "text"` and need to specify the text itsel (`label`) and where to put it on the plot (`x` and `y`).
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  annotate(geom = "text", x = 160, y = 200, label = "Hey, look at this cool observation!")
+```
+
+### Label
+
+Text is just text. It can get lost in the background. For that, you can use a label instead, which adds a rectangle behind the text to make it more visible. For that, you specify `geom = "label"`.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  annotate(geom = "label", x = 160, y = 200, label = "Hey, look at this cool observation!")
+```
+
+### Arrow
+
+As we said earlier, you can draw arrows on a plot. For that, you'd use `geom = "segment"` and `arrow = arrow()`. You also need to specify where the arrow starts (`x` and `y`) and where it ends (`xend` and `yend`). You can also specify the `color` of the arrow to make it more salient.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  annotate(geom = "segment", x = 160, y = 193, xend = 164.5, yend = 180, color = "red", arrow = arrow())
+```
+
+### Line
+
+Say there is a threshold that you want to highlight. You can add a line to the plot using `geom = "segment"`. As with arrows, you have to specify where the line starts and ends and, if you want, the color.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  annotate(geom = "segment", y = 150, yend = 150, x = 140, xend = 200, color = "blue")
+```
+
+### TRY IT
+
+Add an arrow to the plot below pointing to the observation with highest height.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```

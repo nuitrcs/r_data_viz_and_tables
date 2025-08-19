@@ -1,0 +1,113 @@
+---
+title: "Tables for yourself"
+format: html
+editor: visual
+---
+
+# Setup
+
+```{r}
+library(tidyverse)
+library(janitor)
+healthdata <- readr::read_csv("data/nhanes.csv")
+```
+
+# tabyl
+
+`dplyr` is great for counting, but it doesn't have built in ways to add totals columns, or format percentages, or do many of the other operations you want when formatting data into a table to share with others. Fortunately, many other people have also found this to be challenging, so they've developed packages to help us.
+
+One option is the [`tabyl` function](https://cran.r-project.org/web/packages/janitor/vignettes/tabyls.html) from the [`janitor`](https://cran.r-project.org/web/packages/janitor/janitor.pdf) package. It uses the basic `tidyverse` format in the sense that it expects a data frame as the first argument, and then you specify columns without quotes.
+
+## Basic count tables
+
+`tabyl` is good to create quick tables for yourself or to share with your collaborators. If you want to create tables for publication you would probably use other packages. So, this notebook focused on basic count tables.
+
+### One variable
+
+Let's start with creating a table for one variable.
+
+```{r}
+tabyl(healthdata, physically_active)
+```
+
+### Two variables
+
+Let's now create a table with two variables -- or a cross tabulation.
+
+```{r}
+tabyl(healthdata, physically_active, gender)
+```
+
+## Adding totals
+
+If you want to add totals to your cross tab, you can use `adorn_totals` -- by default, it seems across columns.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_totals()
+```
+
+If you want to sum across rows, you can specify `where = "col"`.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_totals(where = "col")
+```
+
+You can also sum across both rows and columns by specifying `where = "both"`.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_totals(where = "both")
+```
+
+## Adding percentages
+
+If you want ot show percentages rather than counts, you can use `adorn_percentages` -- by default, the denominator is the row total.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_percentages()
+```
+
+You can change the denominator to be the column total by specifying `denominator = "col"`.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_percentages(denominator = "col")
+```
+
+You can also add the percentage sign with `adorn_pct_formatting`.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_percentages(denominator = "col") %>% 
+  adorn_pct_formatting() 
+```
+
+Within `adorn_pct_formatting`, you can round with `digits`.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_percentages(denominator = "col") %>% 
+  adorn_pct_formatting(digits=1)
+```
+
+### Adding back in counts
+
+If you want both percentages and counts, you can add `adorn_ns`.
+
+```{r}
+tabyl(healthdata, physically_active, gender) %>% 
+  adorn_percentages(denominator = "col") %>% 
+  adorn_pct_formatting() %>% 
+  adorn_ns()
+```
+
+### TRY IT
+
+Create a cross tab of `work_status` by `survey_year`. Have percentages and counts.
+
+```{r}
+
+```

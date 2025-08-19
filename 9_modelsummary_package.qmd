@@ -1,0 +1,81 @@
+---
+title: "Overview of modelsummary"
+format: html
+editor: visual
+---
+
+# Setup
+
+```{r}
+library(modelsummary)
+library(tidyverse)
+healthdata <- readr::read_csv("data/nhanes.csv")
+```
+
+# Overview of `modelsummary`
+
+Very often (if not always) you need to create tables for your papers. There are different packages to do that in R, and here we present an overview of `modelsummary`, one of the most comprehensive and flexible packages.
+
+[`modelsummary`](https://modelsummary.com/) helps create tables and plots to present descriptive statistics and to summarize statistical models. This notebook provides an overview and quick examples for you to know what the package can do. You will later learn more details about specific functions.
+
+## Data summaries
+
+The `modelsummary` package calls tables to present **descriptive statistics** [data summaries](https://modelsummary.com/vignettes/datasummary.html). You can create data summaries in two ways:
+
+1.  You can use `datasummary`, a flexible function that you can use for many tables presenting descriptive statistics.
+
+2.  You can use `datasummary_*` functions (`datasummary_balance`, `datasummary_correlation`, `datasummary_skim`, `datasummary_df`, `datasummary_crosstab`) for specific, commonly used tables.
+
+For example, just to give you a sense of what data summaries are, let's use `datasummary` to create a table displaying the mean and standard deviation of two variables -- don't worry about the syntax for now:
+
+```{r}
+datasummary(weight + height ~ Mean + SD, data = healthdata)
+```
+
+Or a cross tab between two variables using `datasummary_crosstab`:
+
+```{r}
+datasummary_crosstab(physically_active ~ gender, data = healthdata)
+```
+
+### Output formats
+
+All functions in the `datasummary_*` family accept the same `output` argument. Tables can be saved to various formats such as html, tex, docx, and png.
+
+Note that, often, saving the output to html and copy-pasting into Word works better than saving the output straight to Word.
+
+## Model summaries
+
+The `modelsummary` package also allows you to create [model summaries](https://modelsummary.com/vignettes/modelsummary.html) using the `modelsummary` function, which allows you to customize the information displayed in your tables. For example, you can rename, reorder, subset or omit parameter estimates; choose the goodness-of-fit statistics to display; display various “robust” standard errors or confidence intervals; add titles, footnotes, or source notes; insert stars or custom characters to indicate levels of statistical significance; or add rows with supplemental information about your models.
+
+For example, let's fit some linear regressions and create a regression table -- again, don't worry about the details of the syntax for now, we're just giving you a sense of what's available in `modelsummary`:
+
+```{r}
+lm1 <- lm(weight ~ height + physically_active + gender, data = healthdata)
+lm2 <- lm(weight ~ height + physically_active, data = healthdata)
+lm3 <- lm(weight ~ height, data = healthdata)
+
+modelsummary(list(lm1, lm2, lm3))
+```
+
+### Supported models
+
+One of the nice things about `modelsummary` is that it supports a wide variety of models. It automatically supports all models supported by the `tidy` function of the [`broom` package](https://broom.tidymodels.org/) or the `parameters` function of the [`parameters` package](https://easystats.github.io/parameters/).
+
+You can find the supported models with `supported_models`:
+
+```{r}
+supported_models()
+```
+
+You can check if a model is supported using `get_estimates`:
+
+```{r}
+get_estimates(lm1)
+```
+
+### Output formats
+
+`modelsummary` accept an `output` argument. Tables can be saved to various formats such as html, tex, docx, and png.
+
+Note that, often, saving the output to html and copy-pasting into Word works better than saving the output straight to Word.

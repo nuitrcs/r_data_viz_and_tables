@@ -1,0 +1,44 @@
+---
+title: "ggplot2: Adding more information based on variables in your data"
+format: html
+editor: visual
+---
+
+# Mappings
+
+In `ggplot2`, the mapping specifies how variables (columns) are mapped onto aesthetic attributes. The mapping between variables and aesthetics is accomplished with the `aes` function. Example:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+## Adding aesthetics
+
+Besides x and y, you may want to map variables to other aesthetic attributes: color, fill, shape, line type, size, line width, label, etc. This is useful, for example, to show how a relationship between two numeric variables varies by a categorical variable.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender)) +
+  geom_point()
+```
+
+You can even have two categorical variables at the same time, although it can quickly become too much for one plot.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = gender, shape = physically_active)) +
+  geom_point()
+```
+
+### TRY IT
+
+Create a scatter plot (`geom_point`) of `cholesterol` (`y`) against `weight` (`x`).
+
+```{r}
+
+```
+
+Map `gender` to the `color` aesthetic.
+
+```{r}
+
+```

@@ -1,0 +1,224 @@
+---
+title: "ggplot2: Creating different types of plots"
+format: html
+editor: visual
+---
+
+# Geoms
+
+After mapping data to a plot (with `aes`), you need to display it in a graph. This involves determining how the data are displayed (with points, lines), whether you need to compute new variables from the data (statistical transformations), and where you want to display pieces of data. For the most part, you'll specify this using functions that start with `geom_`, followed by the type of plot.
+
+This notebook mostly presents various common `geom`s and for what type of variables they are appropriate. Towards the end we'll also see that we can use more than one `geom` and that we can change the styling within `geom`.
+
+## Continuous data
+
+This section presents `geom`s that are appropriate for continuous data.
+
+### One variable
+
+This section presents `geom`s that are appropriate to show the distribution of a single continuous variable. Using these is a good practice to understand your data before you go into more complex forms of analysis.
+
+#### Histogram
+
+Histograms are probably the more common way to plot the distribution of a continuous variable. For example, they are a great plot to explore the distribution of the outcome variable in a regression model.
+
+```{r}
+ggplot(data = healthdata, aes(x = weight)) +
+  geom_histogram()
+```
+
+By default, `geom_histogram` uses 30 bins. However, most times you'll want to decide a better number for your data. You'll want to select a number that shows the shape of your data clearly, without over-emphasizing noise but without missing important patterns. You can do some exploration to decide.
+
+```{r}
+ggplot(data = healthdata, aes(x = weight)) +
+  geom_histogram(bins = 100)
+```
+
+```{r}
+ggplot(data = healthdata, aes(x = weight)) +
+  geom_histogram(bins = 5)
+```
+
+```{r}
+ggplot(data = healthdata, aes(x = weight)) +
+  geom_histogram(bins = 20)
+```
+
+### Two variables
+
+This section presents common `geom`s to display the relation between two continuous variables.
+
+#### Scatter plot
+
+A scatter plot is probably the most common way to display the relationship between two continuous variables. For example, it is a great tool for exploratory data analysis as you try to see which variables seem to be related.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+If you have too much data, you may have an issue of overplotting -- or having the points overlap too much and not being able to see the relationship. You can explore the argument `alpha` in `geom_point` and `geom_jitter`.
+
+#### Line plot
+
+Line plots show a trend across values of a variable - most commonly across time, but we don't have a time variable in this data. We'll compute some values across ages instead first so that we have appropriate data for a line plot:
+
+```{r}
+by_age <- healthdata %>%
+  group_by(age) %>%
+  summarize(avg_pulse = mean(pulse, na.rm=TRUE))
+
+by_age
+```
+
+```{r}
+ggplot(data = by_age, aes(x = age, y = avg_pulse)) +
+  geom_line()
+```
+
+## Discrete data
+
+This section presents common `geom`s to display discrete data.
+
+### One variable
+
+#### Bar Plot
+
+Bar plots are by far the most common way to visualize a single discrete variable. In a way, you can think of bar plots like the histograms of discrete data. However, the "bins are pre-defined" in this case, because it's about counting the number of observations for each category. It's basically a visual display of a table.
+
+```{r}
+ggplot(data = healthdata, aes(x = physically_active)) +
+  geom_bar()
+```
+
+## Continuous and discrete data
+
+This section presents common plots to visualize the relationship between continuous and discrete variables.
+
+### One discrete, one continuous
+
+This section presents common plots to visualize the relationship between one discrete and one continuous variables.
+
+#### Side by side box plot
+
+Box plots compactly display the distribution of a continuous variable. They visualize the median, the 25th and 75th percentiles, and outliers (lower or higher than 1.5 times the interquartile range, i.e., the range between the 25th and the 75th percentiles). Side by side box plots display the distribution of a continuous variable by a discrete variable. They are a great way to explore the relationship between continuous and discrete variables as part of the exploratory data analysis or potentially even to present, say, experimental results.
+
+```{r}
+ggplot(data = healthdata, aes(x = physically_active, y = weight)) +
+  geom_boxplot()
+```
+
+### One discrete, two continuous
+
+This section presents common `geom`s to visualize the relationship between one discrete and two continuous variables.
+
+#### Scatter plot by group
+
+Remember that a scatter plot is a great way to visualize the relationship between two continuous variables. You can add a third, discrete variable as the color or shape aesthetic to see how the relationship between the two continuous variables varies by the discrete variable.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point()
+```
+
+## More than one `geom`
+
+You can use multiple `geom`s. This is useful when you want to display different types of information on the same plot, such as raw data points with a trend line.
+
+Let's start with a scatter plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() 
+```
+
+There seems to be a relation. It would be nice to have a visual way to summarize it. We can add another `geom` to the plot, specifically `geom_smooth`. 
+
+`geom_smooth` adds a line to your plot that helps you see the general trend in your data. Although we won't go into all the details here, it works by fitting a model to your data and plotting the predicted values. Depending on how much data you have and whether you change the defaults, there are different models that can be fitted to the data.
+
+By default, `geom_smooth` produces a smoothed line with a confidence band:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  geom_smooth()
+```
+
+You can change the smoothing method used with the `method` argument. For example, you can use a linear regression:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+You can also remove the confidence band with `se = FALSE`:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+### TRY IT
+
+Take a look at the variables available in `healthdata`.
+
+```{r}
+names(healthdata)
+# View(healthdata)
+```
+
+Think of a relationship that would be interesting to explore and, based on the type of variables, create a plot with one or more of the `geom`s presented in this notebook.
+
+```{r}
+
+```
+
+## Changing the styling within `geom`s
+
+Scale functions, `scale_<aesthetic>_<type>`, control visual elements that are about how data are represented. For example, what color palette to use for a discrete variable.
+
+The theme, `theme_*` and `theme` functions, controls the style of plot elements that do not represent data (backgrounds, axes, grids, etc.).
+
+But what if you just want to change the colors of all of the points in a scatter plot - for example, use purple instead of black dots?
+
+Within `geom_*` you can control the style of elements that affect a specific `geom` and that are independent of the data.
+
+### One `geom`
+
+#### Color
+
+For example, you can change the color of the points in a scatter plot to adhere to a style guide.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point(color = "purple") 
+```
+
+#### Shape
+
+You can also change the [shape of the points](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#sec:shape-spec):
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point(shape = 4) 
+```
+
+#### Size
+
+You can also change the size:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point(size = 5) 
+```
+
+#### Transparency
+
+When you have overplotting, you can change the transparency with `alpha` -- that way, you can see that darker regions have more points and lighter regions have less points:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point(size = 5, alpha = 0.5) 
+```

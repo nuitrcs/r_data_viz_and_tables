@@ -1,0 +1,197 @@
+---
+title: "Tables with descriptive statistics"
+format: html
+editor: visual
+---
+
+# Data summaries
+
+The `modelsummary` package calls tables to present **descriptive statistics** [data summaries](https://modelsummary.com/vignettes/datasummary.html). You can create data summaries in two ways:
+
+1.  You can use `datasummary`, a flexible function that you can use for many tables presenting descriptive statistics.
+
+2.  You can use `datasummary_*` functions (`datasummary_balance`, `datasummary_correlation`, `datasummary_skim`, `datasummary_df`, `datasummary_crosstab`) for specific, commonly used tables.
+
+This notebook starts with `datasummary_*` functions since they are simpler to understand and then moves on to the `datasummary` function and some of its options.
+
+## `datasummary_*`
+
+You can use `datasummary_*` functions (`datasummary_balance`, `datasummary_correlation`, `datasummary_skim`, `datasummary_df`, `datasummary_crosstab`) for specific, commonly used tables.
+
+### `datasummary_skim`
+
+[`datasummary_skim`](https://modelsummary.com/man/datasummary_skim.html) provides you a quick overview of numeric and categorical variables. It will summarize all variables in the data frame.
+
+```{r}
+datasummary_skim(healthdata)
+```
+
+To focus on a subset of columns, subset the data first.
+
+```{r}
+healthdata %>% 
+  select(weight, height, physically_active, gender) %>%
+  datasummary_skim()
+```
+
+#### `datasummary_correlation`
+
+[`datasummary_correlation`](https://modelsummary.com/man/datasummary_correlation.html) generates a correlation table for all numeric variables in your data set. Here we select a subset just to make it easier to see:
+
+```{r}
+healthdata %>% 
+  select(weight, height, bp_sys1, bp_dia1, age) %>%
+  datasummary_correlation()
+```
+
+#### `datasummary_crosstab`
+
+[`datasummary_crosstab`](https://modelsummary.com/man/datasummary_crosstab.html) creates cross tabulations for categorical variables:
+
+```{r}
+datasummary_crosstab(physically_active ~ gender, data = healthdata)
+```
+
+##### TRY IT
+
+Create a cross tab of `work_status` by `survey_year`.
+
+```{r}
+
+```
+
+## `datasummary`
+
+`datasummary_*` functions allow you to create specific, commonly used tables. What if you want to create a table that's not implemented as one of the `datasummary_*` functions?
+
+You can use [`datasummary`](https://modelsummary.com/man/datasummary.html), a flexible function that you can use for many tables.
+
+Let's start slowly, creating simple tables. While simple tables don't show all the power of `datasummary`, they are useful to start getting you familiar with the syntax. We'll slowly build to more complex tables.
+
+### Formula syntax
+
+`datasummary` tables are specified using a 2-sided formula, divided by a tilde `~`. The left-hand side describes the rows; the right-hand side describes the columns.
+
+`modelsummary` provides shortcuts for common functions. For example, the `Mean` function is a shortcut supplied by `modelsummary`, and it is equivalent to `mean(x,na.rm=TRUE)`.
+
+Let's create a table that shows the average of a variable:
+
+```{r}
+datasummary(weight ~ Mean, data = healthdata)
+```
+
+We can switch the order of `Mean` and `weight` -- keeping in mind that the left-hand side describes the rows and the right-hand side describes the columns:
+
+```{r}
+datasummary(Mean ~ weight, data = healthdata)
+```
+
+In addition to `Mean`, `modelsummary` supplies these functions: `SD`, `Min`, `Max`, `Median`, `P0`, `P25`, `P50`, `P75`, `P100`, `Histogram`, and a few more.
+
+### Concatenating with `+`
+
+So far we've been creating very simple tables with just one variable. What if you want to include more variables?
+
+You can use `+` to include more rows and columns.
+
+For example, let's create a table with two variables (one in each row) and the mean and standard deviation of each of the variables (in the columns):
+
+```{r}
+datasummary(weight + height ~ Mean + SD, data = healthdata)
+```
+
+### Nesting with `*`
+
+Often, you want to show descriptive statistics of one or more numerical variables by the levels of another categorical variable. For this, `datasummary` can nest variables and statistics inside categorical variables using the `*` symbol. When applying the the `*` operator to factor, character, or logical variables, columns or rows will automatically be nested.
+
+Let's create a table with two numerical variables (in the rows), showing their mean and standard deviation for the levels of a third, categorical variable:
+
+```{r}
+datasummary(weight + height ~ (Mean + SD) * physically_active, data = healthdata)
+```
+
+### TRY IT
+
+Create a table showing the mean and standard deviation of `age` and `sleep_hours` by `gender`.
+
+```{r}
+
+```
+
+### Cross tabs and counts
+
+Let's create a cross tab of two categorical variables:
+
+```{r}
+datasummary(physically_active ~ gender, data = healthdata)
+```
+
+What if want to add the total counts? We can use `N`.
+
+For example, let's add `N` to the right-hand side of the equation to get the row totals:
+
+```{r}
+datasummary(physically_active ~ gender + N, data = healthdata)
+```
+
+We can also get the column totals adding `N` to the left-hand side of the equation:
+
+```{r}
+datasummary(physically_active + N ~ gender, data = healthdata)
+```
+
+### Percentages
+
+If you want percentages instead of counts, you can use `Percent()` -- notice that it's `Percent()` and not `Percent`.
+
+Row percentages:
+
+```{r}
+datasummary(physically_active ~ gender + Percent(), data = healthdata)
+```
+
+Column percentages:
+
+```{r}
+datasummary(physically_active + Percent() ~ gender, data = healthdata)
+```
+
+Percentages for each intersection of categories:
+
+```{r}
+datasummary(physically_active * gender ~ Percent(), data = healthdata)
+```
+
+### Counts and percentages
+
+You can also combine counts and percentages. For example, let's get the count and percentage for each category:
+
+```{r}
+datasummary(physically_active * gender ~ N + Percent(), data = healthdata)
+```
+
+You can further add `1` to the left-hand side to include a row with the total number of observations:
+
+```{r}
+datasummary(physically_active * gender + 1 ~ N + Percent(), data = healthdata)
+```
+
+### TRY IT
+
+Create a cross tab of `work_status` by `survey_year`. Add counts and percentages.
+
+```{r}
+
+```
+
+### Titles and notes
+
+You can add a title and notes to your table using `title` and `notes` -- notice that `notes` takes a vector of notes:
+
+```{r}
+datasummary(physically_active * gender + 1 ~ N + Percent(), 
+            data = healthdata, 
+            fmt = 4,
+            title = "What a nice table!",
+            notes = c("One note.", "Another note."))
+```

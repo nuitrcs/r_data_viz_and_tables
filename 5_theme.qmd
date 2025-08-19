@@ -1,0 +1,331 @@
+---
+title: "ggplot2: Changing visual aspects of the plot that are not controlled by your data"
+format: html
+editor: visual
+---
+
+# Themes
+
+Scale functions control visual aspects of the plot that depend on the data. There are other visual aspects that you may want to change independently of the data (the background color, the font, the size of the legend). You can do this with themes.
+
+## Changing themes
+
+`ggplot2` provides a theme by default, but you can decide among other built-in themes with functions that start with `theme_`, followed by the name of the theme. For example, a nice one is `theme_minimal()`. It's nice because it's simple. In general, the simpler the plot the better. You want to call attention to your argument -- not weird aesthetic choices in your plot.
+
+### Themes available in `ggplot2`
+
+`ggplot2` makes some aesthetic decisions for you by default. You have already seen these, but let's start with a simple scatter plot here:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+If you don't like the defaults, you can use one of the built-in themes that come with `ggplot2` off-the-shelf. As we said earlier, `theme_minimal` is a nice, simple one:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  theme_minimal()
+```
+
+There are other themes, such as `theme_dark`, but remember that in scientific data visualization you're not trying to add necessary complexity:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  theme_dark()
+```
+
+A good rule of thumb is the maximize the "data-to-ink ratio" -- maximize the amount of ink spent on representing the data as opposed to other aspects of the plot.
+
+You can find other themes by typing `theme_` and see the auto-complete options.
+
+### TRY IT
+
+Pick a fun theme for the plot below.
+
+```{r}
+ggplot(data = healthdata, aes(x = health_level, y = income_poverty_ratio)) +
+  geom_boxplot()
+```
+
+## Changing individual elements of the theme
+
+You can also change specific aspects of the theme with the `theme` function. The elements of the theme are:
+
+1.  Plot elements (`plot.background`, `plot.title`, `plot.margin`).
+
+2.  Axis elements (`axis.line`, `axis.text`, `axis.text.x`, `axis.text.y`, `axis.title`, `axis.title.x`, `axis.title.y`, `axis.ticks`, `axis.ticks.length`).
+
+3.  Legend elements (`legend.background`, `legend.key`, `legend.key.size`, `legend.key.height`, `legend.key.width`, `legend.margin`, `legend.text`, `legend.text.align`, `legend.title`, `legend.title.align`).
+
+4.  Panel elements (`panel.background`, `panel.border`, `panel.grid.major`, `panel.grid.major.x`, `panel.grid.major.y`, `panel.grid.minor`, `panel.grid.minor.x`, `panel.grid.minor.y`, `aspect.ratio`).
+
+5.  Faceting elements (`strip.background`, `strip.text`, `strip.text.x`, `strip.text.y`, `panel.spacing`, `panel.spacing.x`, `panel.spacing.y`).
+
+You can change A LOT of things...
+
+For each element there is an element function that describes the visual properties of the element. For example, for `plot.title`, `element_text` controls the font size, color, and face. You could, say, specify `theme(plot.title = element_text(color = "red"))`.
+
+Let's look at a couple of common element things that you may want to customize.
+
+Let's start with this graph:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+### Plot
+
+Let's first look at the plot elements of the theme, which affect the plot as a whole.
+
+#### Title
+
+A major one is the title, which every plot should have!
+
+Let's start with this plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  labs(title = "Height is a good predictor of weight")
+```
+
+You can customize the text of the title to make it conform to a journal's style guide. For now, let's have some fun here...
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  labs(title = "Height is a good predictor of weight") +
+  theme(plot.title = element_text(color = "red", face = "bold", size = 30, family = "Times New Roman"))
+```
+
+#### Margins
+
+You can also change the margins around the area of the plot where the data are.
+
+Let's start with this plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() 
+```
+
+Now let's change the margins:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 1, unit = "cm"))
+```
+
+### Axis
+
+Let's now turn to the theme elements that control the appearance of the axes.
+
+#### Titles
+
+You can also change the text of the axes titles.
+
+Let's start with this plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() 
+```
+
+Now let's change the axes titles.
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  theme(
+    axis.title.x = element_text(color = "green", family = "Arial"),
+    axis.title.y = element_text(color = "brown", family = "Comic Sans MS"))
+```
+
+### Legend
+
+Let's now turn to the legend elements, which control the appearance of all legends.
+
+Let's work with this plot (with a variable mapped to color) to have a legend:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point()
+```
+
+#### Legend labels
+
+You can also change the text of the legend labels.
+
+Remember our base plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point()
+```
+
+Now let's change the text of the legend labels:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  theme(legend.text = element_text(size = 30, family = "serif", color = "gray85"))
+```
+
+#### Legend title
+
+You can also change the text of the legend title.
+
+Remember our base plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point()
+```
+
+Now let's change the text of the legend title:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  theme(legend.title = element_text(size = 10, family = "Courier New"))
+```
+
+If you want to change the title of the legend, you can use `labs` or scales (`scale_*`).
+
+### Panel
+
+Let's now turn to the panel elements, which control the appearance of the plotting panels.
+
+#### Minor grid lines
+
+One of the main things that you can control in the plotting panels are the grid lines, both the minor and major ones.
+
+Let's start with the minor grid lines. The minor grid lines correspond to the breaks between the major breaks in the axes -- or the ones with the tick labels.
+
+Remember our simple plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+Now let's remove the minor grid lines:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  theme(panel.grid.minor = element_blank())
+```
+
+#### Major grid lines
+
+Let's now turn to the major grid lines. The major grid lines correspond to the major breaks on the axes -- or the ones with the labels.
+
+Remember our simple plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+Now let's remove the major grid lines:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  theme(panel.grid.major = element_blank())
+```
+
+### Panel background
+
+Let's now turn to the background of the plot (under the data).
+
+Remember our simple plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+Let's remove all the background:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  theme(panel.background = element_blank())
+```
+
+### TRY IT
+
+Adjust some of the plot, axis, legend, and panel theme elements of the plot below to make it look professional (i.e., what you'd see in a journal).
+
+```{r}
+ggplot(data = healthdata, aes(x = age, y = pulse)) +
+  geom_point()
+```
+
+## Re-using a custom theme
+
+Wow, we've changed a lot! A LOT! You may be thinking: "I do so many plots, I don't want to be changing all these elements each time!" And you're right. You don't want to be doing that each time if you can avoid it...
+
+If you are creating a lot of similar plots for a paper, or if you (or your lab) typically create(s) a lot of similar plots, you may want to create a really awesome custom theme that you like, and re-use that custom theme.
+
+Once you create a custom theme, you can assign it to a variable and re-use it later:
+
+```{r}
+my_awesome_theme <- theme(
+    plot.title = element_text(color = "red", face = "bold", size = 30, family = "Times New Roman"),
+    plot.margin = margin(t = 1, r = 1, b = 1, l = 1, unit = "cm"),
+    axis.text = element_text(color = "purple", face = "italic", family = "Verdana"),
+    axis.title.x = element_text(color = "green", family = "Arial"),
+    axis.title.y = element_text(color = "brown", family = "Comic Sans MS"),
+    legend.margin = margin(r = 50, l = 50),
+    legend.text = element_text(size = 30, family = "serif", color = "gray85"),
+    legend.title = element_text(size = 10, family = "Courier New"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.background = element_blank())
+```
+
+You could have that code in a module and [`source`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/source) it.
+
+Remember our base plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  labs(title = "Height is a good predictor of weight")
+```
+
+Then you simply add the variable to which you assigned the custom theme:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  labs(title = "Height is a good predictor of weight") +
+  my_awesome_theme
+```
+
+In `my_awesome_theme`, we created a theme from scratch, meaning, changing individual elements. You can also start with a complete, built-in theme (or a theme from `ggthemes`), add to it, and save that:
+
+```{r}
+better_theme <- theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", family = "Times New Roman"),
+        axis.title = element_text(family = "Times New Roman"),
+        legend.text = element_text(family = "Times New Roman"),
+        legend.title = element_text(family = "Times New Roman"))
+```
+
+Then, again, you just add that to your plot:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  labs(title = "Height is a good predictor of weight") +
+  better_theme
+```

@@ -1,0 +1,28 @@
+---
+title: "ggplot2: Plotting subsets of the data"
+format: html
+editor: visual
+---
+
+# Facets
+
+Sometimes you want to plot different subsets of the data using the same visualization settings. Facets help you do this with functions that start with `facet_`.
+
+[`facet_grid`](https://ggplot2.tidyverse.org/reference/facet_grid.html) is the most common function to add facets to a plot. It forms a matrix of panels defined by row and column faceting variables.
+
+Here we're using `rows` to specify that we want each value of `physically_active` to be a different row (as opposed to `cols`). We need to use `vars` to specify the variable to use for the facets. Think of `vars` as `aes` -- it's the way to tell `ggplot2` that you want to use columns from the data set specified in `ggplot`.
+
+```{r}
+ggplot(data = healthdata, aes(x = weight)) +
+  geom_histogram(bins = 20) +
+  facet_grid(rows = vars(physically_active))
+```
+
+## TRY IT
+
+Facet the plot below by `gender`, with each `gender` being a different column.
+
+```{r}
+ggplot(data = healthdata, aes(x = weight)) +
+  geom_histogram(bins = 20)
+```

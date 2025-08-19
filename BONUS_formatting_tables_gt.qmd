@@ -1,0 +1,144 @@
+---
+title: "Formatting tables with gt"
+format: html
+editor: visual
+---
+
+# Setup
+
+```{r}
+library(gt)
+library(tidyverse)
+library(janitor)
+healthdata <- readr::read_csv("data/nhanes.csv")
+```
+
+# `gt`
+
+[`gt`](https://gt.rstudio.com/index.html) is a package that allows you to create publication-ready tables. `gt` is built around the idea that we can construct a wide variety of tables with a cohesive set of table parts.
+
+You can format tables created with different functions/packages --such as `tabyl` from `janitor` and `modelsummary` and `datasummary*` from `modelsummary`-- with `gt`. Here we're using a simple example with `tabyl`:
+
+```{r}
+tabyl(healthdata, physically_active, gender)
+```
+
+You first need to convert the original table to a `gt` object:
+
+```{r}
+tabyl(healthdata, physically_active, gender) |>
+  gt()
+```
+
+## Table header
+
+The header is one of the table parts and it includes the title and subtitle. You can customize the header with `tab_header`.
+
+### Title
+
+Let's add a title, using `title` within `tab_header`:
+
+```{r}
+tabyl(healthdata, physically_active, gender) |>
+  gt() |>
+  tab_header(title = "Awesome table")
+```
+
+### TRY IT
+
+Use `gt` to add a title to the table below.
+
+```{r}
+tabyl(healthdata, survey_year, work_status)
+```
+
+## Column labels
+
+The column labels include the label of each column as well as any spanner column label.
+
+### Column labels
+
+You can change the column labels with `cols_label` specifying a mapping of column names (from your data) to the new display labels you want in the table.
+
+```{r}
+tabyl(healthdata, physically_active, gender) |>
+  gt() |>
+  tab_header(title = "Awesome table", 
+             subtitle = "Groundbreaking insight") |>
+  cols_label(physically_active = "Active", 
+             female = "Female", 
+             male = "Male")
+```
+
+### TRY IT
+
+Go back to the table that you created in the previous exercise and add column labels.
+
+```{r}
+
+```
+
+### Spanner column label
+
+If you need a label that spans a subset of columns, use a spanner, which you can add with `tab_spanner`, specifying the spanner label text and the set of columns it should cover:
+
+```{r}
+tabyl(healthdata, physically_active, gender) |>
+  gt() |>
+  tab_header(title = "Awesome table", 
+             subtitle = "Groundbreaking insight") |>
+  cols_label(physically_active = "Active", 
+             female = "Female", 
+             male = "Male") |>
+  tab_spanner(label = "Gender", 
+              columns = c(female, male))
+```
+
+## Table footer
+
+The table footer can include footnotes or source notes.
+
+### Source notes
+
+You can add source notes with `tab_source_note`:
+
+```{r}
+tabyl(healthdata, physically_active, gender) |>
+  gt() |>
+  tab_header(title = "Awesome table", 
+             subtitle = "Groundbreaking insight") |>
+  cols_label(physically_active = "Active", 
+             female = "Female", 
+             male = "Male") |>
+  tab_spanner(label = "Gender", 
+              columns = c(female, male)) |>
+  tab_source_note(source_note = "NHANES data.")
+```
+
+## Output formats
+
+You can [save `gt` tables](https://gt.rstudio.com/reference/gtsave.html) in various formats such as html, docx, and tex using `gtsave`. `filename` is the path where the file will be saved:
+
+```{r}
+tabyl(healthdata, physically_active, gender) |>
+  gt() |>
+  tab_header(title = "Awesome table", 
+             subtitle = "Groundbreaking insight") |>
+  cols_label(physically_active = "Active", 
+             female = "Female", 
+             male = "Male") |>
+  tab_spanner(label = "Gender", 
+              columns = c(female, male)) |>
+  tab_source_note(source_note = "NHANES data.") |>
+  gtsave(filename = "formatting_tables_gt_table.html")
+```
+
+Note that, often, saving the output to html and copy-pasting into Word works better than saving the output straight to Word.
+
+### TRY IT
+
+Save to html and word (`.docx`) the table you made above.
+
+```{r}
+
+```

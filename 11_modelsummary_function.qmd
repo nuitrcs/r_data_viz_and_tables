@@ -1,0 +1,248 @@
+---
+title: "Tables for regression models"
+format: html
+editor: visual
+---
+
+# `modelsummary`
+
+The `modelsummary` package allows you to create [model summaries](https://modelsummary.com/vignettes/modelsummary.html) using the `modelsummary` function, which allows you to customize the information displayed in your tables.
+
+## One model
+
+Let's fit a regression model to use for tables:
+
+```{r}
+lm1 <- lm(weight ~ height + physically_active + gender, data = healthdata)
+summary(lm1)
+```
+
+Very simply, with `modelsummary`, you can create a regression table for one model:
+
+```{r}
+modelsummary(lm1)
+```
+
+## Several models
+
+Let's fit two more models to have a more complex table:
+
+```{r}
+lm2 <- lm(weight ~ height + physically_active, data = healthdata)
+lm3 <- lm(weight ~ height, data = healthdata)
+```
+
+To create a table with more than one regression model, you need to put the models inside of a list:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3))
+```
+
+### TRY IT
+
+Create a table for the three models in the code below.
+
+```{r}
+lme1 <- lm(cholesterol ~ age, data = healthdata)
+lme2 <- lm(cholesterol ~ age + gender, data = healthdata)
+lme3 <- lm(cholesterol ~ age + gender + weight, data = healthdata)
+
+
+```
+
+## Customizing the coefficients you present
+
+As you can see, it's very easy to create a table. However, chances are you're not using that table as is for a paper! `modelsummary` is very flexible and allows you to customize what you present.
+
+Let's start by customizing the coefficients that you present.
+
+### `coef_omit`
+
+You can subset the coefficients to present using `coef_omit`, which accepts a vector of integer or a regular expression.
+
+For example, let's omit the intercept:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), coef_omit = 1)
+```
+
+We can also do it with a regular expresion (a very simple one in this case):
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), coef_omit = "Intercept")
+```
+
+### `coef_rename`
+
+`coef_rename` allows you to rename coefficients passing a named character vector:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_rename = c("(Intercept)" = "Intercept",
+                             "height" = "Height", 
+                             "physically_activeYes" = "Active", 
+                             "gendermale" = "Male"))
+```
+
+### `coef_map`
+
+With `coef_map` you can rename, reorder, and subset coefficients at the same time passing a named character vector:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"))
+```
+
+### `include_reference`
+
+You can include an empty row for the reference category by adding `include_reference = TRUE`:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), include_reference = TRUE)
+```
+
+### TRY IT
+
+Go back to the table that you created in the previous exercise and omit the intercept and rename the coefficients.
+
+```{r}
+modelsummary(list(lme1, lme2, lme3))
+```
+
+## Customizing the statistics you present
+
+In addition to customizing the coefficients that you present, another big thing that you can customize are the statistics that you present.
+
+### `statistic`
+
+By default, `modelsummary` prints the coefficient’s standard error in parentheses below the corresponding estimate. The value of this uncertainty statistic is determined by the `statistic` argument. The `statistic` argument accepts any of the column names produced by `get_estimates(model)`.
+
+```{r}
+get_estimates(lm1)
+```
+
+`statistic = NULL` omits all statistics for the coefficients.
+
+#### P-value
+
+`statistic = "p.value"` adds p-values.
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"),
+             statistic = "p.value")
+```
+
+#### Various statistics
+
+What if you want both the standard error and the p-value? You can provide a [glue string](https://glue.tidyverse.org/) for more complicated results.
+
+The `glue` syntax allows you to include R expressions inside of strings by using `{}`. This can make your code more readable.
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"),
+             statistic = "{std.error} ({p.value})")
+```
+
+### `gof_omit`
+
+`gof_omit` is a regular expression to detect the names of the statistics which should be excluded from the table of **g**oodness **o**f **f**it statistics in the bottom section of the table.
+
+In this case, we're specifying the goodness of fit statistics that we don't want and combining them with `|`, which stands for "or".
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"),
+             statistic = "{std.error} ({p.value})",
+             gof_omit = "AIC|BIC|Log.Lik|RMSE|R2 Adj.")
+```
+
+### TRY IT
+
+Go back to the table that you created in the previous exercise and customize the statistics that you present.
+
+```{r}
+
+```
+
+## Other arguments
+
+We already saw how to customize the coefficients and the statistics presented in the table. There are many other things that you can customize, some of which we present in this section.
+
+### `stars`--marks of statistical significance
+
+You can add stars to mark statistical significance by adding `stars = TRUE`:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"),
+             gof_omit = "AIC|BIC|Log.Lik|RMSE|R2 Adj.",
+             stars = TRUE)
+```
+
+You can also add stars in `statistic`:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"),
+             statistic = "{std.error} ({p.value}){stars}",
+             gof_omit = "AIC|BIC|Log.Lik|RMSE|R2 Adj.")
+```
+
+### Title
+
+You can add a title to your table with a string in `title`:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"),
+             statistic = "{std.error} ({p.value}){stars}",
+             gof_omit = "AIC|BIC|Log.Lik|RMSE|R2 Adj.",
+             title = "Awesome table")
+```
+
+### Notes
+
+You can add notes to your table passing a list of strings to `notes`:
+
+```{r}
+modelsummary(list(lm1, lm2, lm3), 
+             coef_map = c("physically_activeYes" = "Active", 
+                          "gendermale" = "Male", 
+                          "height" = "Height",
+                          "(Intercept)" = "Intercept"),
+             statistic = "{std.error} ({p.value}){stars}",
+             gof_omit = "AIC|BIC|Log.Lik|RMSE|R2 Adj.",
+             title = "Awesome table",
+             notes = list("First note.", "Second note."))
+```
+
+### TRY IT
+
+Go back to the table that you created in the previous exercise and change some of the formatting.
+
+```{r}
+
+```

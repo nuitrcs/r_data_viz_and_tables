@@ -1,0 +1,171 @@
+---
+title: "ggplot2: Making clear what your graph shows about the data"
+format: html
+editor: visual
+---
+
+# Scales
+
+Scales help you translate the visuals of a graph into an understanding of the data, for example, with guides like axes or legends. Scales are responsible for updating the limits of a plot, setting the breaks, and formatting the labels.
+
+## Default scales
+
+Once you have data, mapping, and layers, you'll have scales by default.
+
+Let's start with a scatter plot with color:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() 
+```
+
+Let's "add some scales:"
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_color_discrete()
+```
+
+Wait, it looks the same! Yes, it's because `ggplot2` added default scales.
+
+Notice the relation between scales and mappings (`aes`). There is a scale function for each part of the data (variable) referred to in the mapping -- x, y, and color.
+
+## Replacing scales
+
+If you want to change the default scales, you can use functions that start with `scale_`, followed by the aesthetic they modify (x, y, color), and ending with the type of scale that you want (so `scale_<aesthetic>_<type>`).
+
+For example, say we want to change the colors. There are [color scales for continuous data](https://ggplot2-book.org/scales-colour.html#sec-colour-continuous) and [color scales for discrete data](https://ggplot2-book.org/scales-colour.html#sec-colour-discrete) that you can use off-the-shelf, for example, `scale_color_viridis_d`:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_color_viridis_d()
+```
+
+You can also change the colors manually within `scale_color_manual`:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_color_manual(values = c("No" = "orange", "Yes" = "blue"))
+```
+
+Let's look at a few other common things that you may want to do with scales.
+
+### TRY IT
+
+Change the code below to use a [continuous color scale](https://ggplot2-book.org/scales-colour.html#sec-colour-continuous):
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = cholesterol)) +
+  geom_point()
+```
+
+## Update the axes
+
+One of the things that you may want to do with scales is update the axes, which are key on conveying your plot's information.
+
+### Axes limits
+
+You may want to update the axes limits to show a specific region of the plot that's important for your argument.
+
+To show how to update the axes limits, let's start with a basic scatter plot with a smoothed line:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point()
+```
+
+Let's now adjust the axes limits:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  scale_x_continuous(limits = c(150, 170)) +
+  scale_y_continuous(limits = c(100, 200))
+```
+
+Okay, it *seems* that we Zoomed on a section of the graph. However, it's important to keep in mind that **adjusting the limits of the axes is different than Zooming in.**
+
+To notice the difference, it's helpful to add a regression line.
+
+Let's start without adjusting the axes limits -- pay attention to the slope of the line:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+Now let's adjust the axes limits and notice what happens to the slope of the line:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(150, 170)) +
+  scale_y_continuous(limits = c(100, 200))
+```
+
+The line was going up and now it's going down! This is because **adjusting the axes limits using scales deletes the data points outside of the range.** Thus, the regression line is being fit only in a subset of the data. If you want to do this, it's probably a better idea to subset your data before your plot, to make it more clear to yourself and others what you're doing and avoid any unintended consequences.
+
+### TRY IT
+
+In the plot below, limit the x axis between 150 and 190.
+
+```{r}
+ggplot(data = healthdata, aes(x = height)) +
+  geom_histogram()
+```
+
+## Update the legend
+
+You may also want to update the legend of the plot.
+
+### Add legend title
+
+For example, you may want to add a legend title.
+
+To show that, let's start with a scatter plot with color:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  scale_color_manual(values = c("No" = "orange", "Yes" = "blue"))
+```
+
+The default title is the name of the variable. So, you could change the name of the variable. However, you may not want to do that to keep clean names, so you can also change it in scales:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  scale_color_manual(values = c("No" = "orange", "Yes" = "blue"), name = "Activity status")
+```
+
+### Changing legend keys
+
+You may also want to change the legend keys. The default keys are the values of the variable. So, you could change the underlying values or, as we're going to show next, use scales.
+
+To show this,let's now change the legend keys:
+
+```{r}
+ggplot(data = healthdata, aes(x = height, y = weight, color = physically_active)) +
+  geom_point() +
+  scale_color_manual(values = c("No" = "orange", "Yes" = "blue"), name = "Activity status", labels = c("No" = "Not active", "Yes" = "Active"))
+```
+
+### TRY IT
+
+In the plot below, change the title of the legend.
+
+```{r}
+ggplot(data = healthdata, aes(x = height)) +
+  geom_histogram(aes(fill = marital_status))
+```
